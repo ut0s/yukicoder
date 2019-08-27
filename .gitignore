@@ -34,3 +34,7 @@
 *.app
 
 
+src/Makefile
+src/exe/*
+src/test
+src/sys

@@ -1,5 +1,5 @@
 #!/bin/bash
-# @date Time-stamp: <2019-08-27 11:06:07 tagashira>
+# @date Time-stamp: <2019-08-31 06:59:26 tagashira>
 # @file yuki.sh
 # @brief
 
@@ -16,7 +16,7 @@ function usage() {
 Usage:
   $0 COMMAND
 
-  COMMAND      session, new, dl, test, sys|system, sub|submit, open, me, help
+  COMMAND      session, new, dl, test, sys|system, sub|submit, ci|commit, open, me, help
 EOS
   echo ""
   cat ${path_to_yukicoder}/bin/yuki.sh | grep "@doc" |cut -d ' ' -f2- |tail -n +2 | awk -F'##' '{printf "%-30s %s\n",$1,$2}'
@@ -145,10 +145,40 @@ oj_submit(){
 
   local url="https://yukicoder.me/problems/no/${contest_id}"
 
-  oj submit --language cpp14 --no-guess --wait 0 --guess-cxx-compiler gcc --no-open $url $contest_id.cpp |& tee tmp.log
-  readonly submitted_url=$(cat tmp.log | grep "success: result:" |cut -d ' ' -f4)
+  tmplog=$(mktemp)
+  oj submit --language cpp14 --no-guess --wait 0 --guess-cxx-compiler gcc --no-open $url $contest_id.cpp |& tee $tmplog
+  readonly submitted_url=$(cat $tmplog | grep "success: result:" |cut -d ' ' -f4)
   # echo $submitted_url
-  rm -f tmp.log
+  rm -f $tmplog
+}
+
+oj_submit_force(){
+  local command=$1
+  local contest_id=$2
+
+  local url="https://yukicoder.me/problems/no/${contest_id}"
+
+  oj submit --language cpp14 --no-guess --wait 0 --guess-cxx-compiler gcc --no-open --yes $url $contest_id.cpp
+}
+
+
+commit_submission(){
+  local command=$1
+  local contest_id=$2
+
+  local submission_me="https://yukicoder.me/submissions?submitter=8576&status=AC"
+  local title=$(cat ${contest_id}.cpp | grep "@title" | cut -d ' ' -f4-6)
+  local tmpfile=$(mktemp)
+  wget -q -O- $submission_me | grep -A5 -B5 "No.$contest_id" > $tmpfile
+
+  local submission_num=$(cat $tmpfile | grep "submission" | cut -d'<' -f3 | cut -d'>' -f2)
+  local url="https://yukicoder.me/problems/no/${contest_id}"
+  local submission_url="https://yukicoder.me/submissions/$submission_num"
+
+  git add ${contest_id}.cpp &&\
+    git commit -m "add: $title | (AC) $submission_url"
+
+  rm $tmpfile
 }
 
 
@@ -193,6 +223,9 @@ function main() {
     "system" ) oj_system_test $@ ;;
     "sub" ) oj_submit $@ && $open_browser $submitted_url ;;
     "submit" ) oj_submit $@ && $open_browser $submitted_url ;;
+    "subforce" ) oj_submit_force $@ ;;
+    "ci" ) commit_submission $@ ;;
+    "commit" ) commit_submission $@ ;;
     "open" ) open_problem_page $@ ;;
     "me" ) open_submission_page $@ ;;
     "help" ) usage ;;

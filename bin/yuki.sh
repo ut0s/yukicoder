@@ -120,9 +120,9 @@ oj_test(){
   local command=$1
   local contest_id=$2
 
-  time make $contest_id &&\
-  mv $contest_id exe/$contest_id
   if [ ! -d test/$contest_id ]; then oj_download command $contest_id ;fi
+  time make $contest_id &&\
+  mv $contest_id exe/$contest_id &&\
   oj test --tle $TLE --jobs $JOB --print-input --print-memory -d test/$contest_id -c ./exe/$contest_id
 }
 
@@ -131,9 +131,9 @@ oj_system_test(){
   local command=$1
   local contest_id=$2
 
-  time make $contest_id &&\
-  mv $contest_id exe/$contest_id
   if [ ! -d sys/$contest_id ]; then oj_download_sys command $contest_id ;fi
+  time make $contest_id &&\
+  mv $contest_id exe/$contest_id &&\
   oj test --tle $TLE --jobs $JOB --print-input --print-memory -d sys/$contest_id -c ./exe/$contest_id
 }
 

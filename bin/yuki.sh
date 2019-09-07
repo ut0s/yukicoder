@@ -1,5 +1,5 @@
 #!/bin/bash
-# @date Time-stamp: <2019-08-31 06:59:26 tagashira>
+# @date Time-stamp: <2019-09-07 08:00:46 tagashira>
 # @file yuki.sh
 # @brief
 
@@ -53,15 +53,16 @@ setup_contest(){
 
   url="https://yukicoder.me/problems/no/${contest_id}"
   title=$(wget -q -O- $url | grep "title" | cut -d ">" -f2 | cut -d "<" -f1)
+  file=$(printf "%03d" $contest_id).cpp
 
-  if [ -e $contest_id.cpp ]
+  if [ -e ${file} ]
   then
     oj_download "command" $contest_id $url
   else
-    touch $contest_id.cpp
-    cat <<EOS >> $contest_id.cpp
+    touch ${file}
+    cat <<EOS >> ${file}
 /**
-  @file $contest_id.cpp
+  @file $file
   @title $title
   @url $url
 **/
@@ -164,10 +165,12 @@ oj_submit_force(){
 
 commit_submission(){
   local command=$1
-  local contest_id=$2
+  local contest_id=$(echo $2 | sed 's/0*\([0-9]*[0-9]$\)/\1/g')
+
+  local file=$(printf "%03d" $contest_id ).cpp
 
   local submission_me="https://yukicoder.me/submissions?submitter=8576&status=AC"
-  local title=$(cat ${contest_id}.cpp | grep "@title" | cut -d ' ' -f4-6)
+  local title=$(cat $file | grep "@title" | cut -d ' ' -f4-6)
   local tmpfile=$(mktemp)
   wget -q -O- $submission_me | grep -A5 -B5 "No.$contest_id" > $tmpfile
 
@@ -175,7 +178,7 @@ commit_submission(){
   local url="https://yukicoder.me/problems/no/${contest_id}"
   local submission_url="https://yukicoder.me/submissions/$submission_num"
 
-  git add ${contest_id}.cpp &&\
+  git add $file &&\
     git commit -m "add: $title | (AC) $submission_url"
 
   rm $tmpfile

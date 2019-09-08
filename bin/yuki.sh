@@ -1,5 +1,5 @@
 #!/bin/bash
-# @date Time-stamp: <2019-09-07 08:00:46 tagashira>
+# @date Time-stamp: <2019-09-08 21:13:17 tagashira>
 # @file yuki.sh
 # @brief
 
@@ -169,13 +169,13 @@ commit_submission(){
 
   local file=$(printf "%03d" $contest_id ).cpp
 
-  local submission_me="https://yukicoder.me/submissions?submitter=8576&status=AC"
+  local submission_me="https://yukicoder.me/problems/no/$contest_id/submissions?submitter=8576&status=AC"
   local title=$(cat $file | grep "@title" | cut -d ' ' -f4-6)
+
   local tmpfile=$(mktemp)
   wget -q -O- $submission_me | grep -A5 -B5 "No.$contest_id" > $tmpfile
 
   local submission_num=$(cat $tmpfile | grep "submission" | cut -d'<' -f3 | cut -d'>' -f2)
-  local url="https://yukicoder.me/problems/no/${contest_id}"
   local submission_url="https://yukicoder.me/submissions/$submission_num"
 
   git add $file &&\

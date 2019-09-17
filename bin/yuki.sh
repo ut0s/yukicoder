@@ -1,5 +1,5 @@
 #!/bin/bash
-# @date Time-stamp: <2019-09-08 21:13:17 tagashira>
+# @date Time-stamp: <2019-09-17 20:10:25 tagashira>
 # @file yuki.sh
 # @brief
 
@@ -55,41 +55,20 @@ setup_contest(){
   title=$(wget -q -O- $url | grep "title" | cut -d ">" -f2 | cut -d "<" -f1)
   file=$(printf "%03d" $contest_id).cpp
 
-  if [ -e ${file} ]
+  if [ -e $file ]
   then
     oj_download "command" $contest_id $url
   else
-    touch ${file}
-    cat <<EOS >> ${file}
+    touch $file
+    cat <<EOS >> $file
 /**
   @file $file
   @title $title
   @url $url
 **/
 
-#include <bits/stdc++.h>
-using namespace std;
-
-typedef long long LL;
-#define ALL(obj) (obj).begin(), (obj).end()
-#define REP(i, N) for (int i = 0; i < (N); ++i)
-
-
-int main() {
-  int i, j, k, l;
-
-  string S;
-  cin >> S;
-
-  int N;
-  cin >> N;
-
-  cout << "" << endl;
-  return 0;
-}
-
 EOS
-
+    cat $path_to_yukicoder/etc/template.cpp >> $file
     oj_download "command" $contest_id $url
   fi
 }

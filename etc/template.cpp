@@ -19,7 +19,7 @@ typedef long long LL;
 #define ZEROS(x) fill(x, 0)
 
 #define SORT(x) sort(ALL(x))
-#define UNIQ(x) v.erase(unique(ALL(x)), x.end())
+#define UNIQ(x) x.erase(unique(ALL(x)), x.end())
 
 #define BIT(n) (1LL << (n))
 

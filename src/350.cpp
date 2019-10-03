@@ -49,21 +49,43 @@ void iostream_init() {
   cout.precision(12);
 }
 
+vector<string> split(string S, string separator) {
+  auto separator_length = separator.length();
+
+  auto list = vector<string>();
+
+  auto offset = string::size_type(0);
+  while (1) {
+    auto pos = S.find(separator, offset);
+    if (pos == string::npos) {
+      list.push_back(S.substr(offset));
+      break;
+    }
+    list.push_back(S.substr(offset, pos - offset));
+    offset = pos + separator_length;
+  }
+
+  return list;
+}
+
 int main() {
   ::iostream_init();
 
-  double v;
-  double t;
+  string v;
+  int t;
   cin >> v >> t;
 
-  string S = to_string(v * t);
-  REP(i, SZ(S)) {
-    if (S.substr(i, 1) == ".") {
-      cout << "\n";
-      break;
-    }
-    cout << S.substr(i, 1);
-  }
+  v = split(v, ".")[1];
+  OUT(stoi(v) * t / 10000);
+
+  // string S = to_string(v * t);
+  // REP(i, SZ(S)) {
+  //   if (S.substr(i, 1) == ".") {
+  //     cout << "\n";
+  //     break;
+  //   }
+  //   cout << S.substr(i, 1);
+  // }
 
   return 0;
 }

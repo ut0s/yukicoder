@@ -2,6 +2,7 @@
 using namespace std;
 
 typedef long long LL;
+typedef unsigned long long uLL;
 #define ALL(obj) (obj).begin(), (obj).end()
 #define RALL(x) (x).rbegin(), (x).rend()
 #define SZ(x) ((int)(x).size())
@@ -19,6 +20,8 @@ typedef long long LL;
 #define ZEROS(x) fill(x, 0)
 
 #define SORT(x) sort(ALL(x))
+#define RSORT(x) sort(RALL(x))
+
 #define UNIQ(x) x.erase(unique(ALL(x)), x.end())
 
 #define BIT(n) (1LL << (n))
@@ -41,6 +44,8 @@ void iostream_init() {
   cin.tie(0);
   cout.setf(ios::fixed);
   cout.precision(12);
+  // cout.fill('0');
+  // cout.width(3);
 }
 
 int main() {

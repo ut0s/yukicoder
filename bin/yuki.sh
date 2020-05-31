@@ -1,5 +1,5 @@
 #!/bin/bash
-# @date Time-stamp: <2019-09-17 20:10:25 tagashira>
+# @date Time-stamp: <2020-05-31 21:30:04 tagashira>
 # @file yuki.sh
 # @brief
 
@@ -53,7 +53,7 @@ setup_contest(){
 
   url="https://yukicoder.me/problems/no/${contest_id}"
   title=$(wget -q -O- $url | grep "title" | cut -d ">" -f2 | cut -d "<" -f1)
-  file=$(printf "%03d" $contest_id).cpp
+  file=$(printf "%04d" $contest_id).cpp
 
   if [ -e $file ]
   then
@@ -146,7 +146,7 @@ commit_submission(){
   local command=$1
   local contest_id=$(echo $2 | sed 's/0*\([0-9]*[0-9]$\)/\1/g')
 
-  local file=$(printf "%03d" $contest_id ).cpp
+  local file=$(printf "%04d" $contest_id ).cpp
 
   local submission_me="https://yukicoder.me/problems/no/$contest_id/submissions?submitter=8576&status=AC"
   local title=$(cat $file | grep "@title" | cut -d ' ' -f4-6)

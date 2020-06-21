@@ -1,5 +1,5 @@
 #!/bin/bash
-# @date Time-stamp: <2020-05-31 21:30:04 tagashira>
+# @date Time-stamp: <2020-06-21 14:56:57 tagashira>
 # @file yuki.sh
 # @brief
 
@@ -154,7 +154,7 @@ commit_submission(){
   local tmpfile=$(mktemp)
   wget -q -O- $submission_me | grep -A5 -B5 "No.$contest_id" > $tmpfile
 
-  local submission_num=$(cat $tmpfile | grep "submission" | cut -d'<' -f3 | cut -d'>' -f2)
+  local submission_num=$(cat $tmpfile | grep "submission" | cut -d'<' -f3 | cut -d'>' -f2 | tr -d ' ' | tr -d '\n' )
   local submission_url="https://yukicoder.me/submissions/$submission_num"
 
   git add $file &&\

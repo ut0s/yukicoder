@@ -54,7 +54,7 @@ setup_contest(){
   local contest_id=$1
 
   ln -fs ${path_to_yukicoder}/etc/Makefile .
-  mkdir -p test/${contest_id}
+  mkdir -p test/$(printf "%04d" $contest_id)
 
   url="https://yukicoder.me/problems/no/${contest_id}"
   title=$(wget -q -O- $url | grep "title" | cut -d ">" -f2 | cut -d "<" -f1)

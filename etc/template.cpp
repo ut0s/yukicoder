@@ -3,6 +3,8 @@ using namespace std;
 
 typedef long long LL;
 typedef unsigned long long uLL;
+typedef unsigned int uint;
+
 #define ALL(obj) (obj).begin(), (obj).end()
 #define RALL(x) (x).rbegin(), (x).rend()
 #define SZ(x) ((int)(x).size())

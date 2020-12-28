@@ -1,11 +1,16 @@
 #!/bin/bash
-# @date Time-stamp: <2020-06-21 14:56:57 tagashira>
 # @file yuki.sh
 # @brief
 
 set -ue
 
-readonly open_browser="google-chrome"
+if [ "$(uname)" == 'Darwin' ]; then
+  readonly open_browser="open /Applications/Google\ Chrome.app"
+  export PATH="/Users/tagashira/Library/Python/3.9/bin:$PATH"
+else
+  readonly open_browser="google-chrome"
+fi
+
 readonly path_to_yukicoder="$HOME/yukicoder/"
 
 readonly TLE="3" # second
@@ -126,7 +131,8 @@ oj_submit(){
   local url="https://yukicoder.me/problems/no/${contest_id}"
 
   tmplog=$(mktemp)
-  oj submit --language cpp14 --no-guess --wait 0 --guess-cxx-compiler gcc --no-open $url $contest_id.cpp |& tee $tmplog
+  # oj submit --language cpp14 --no-guess --wait 0 --guess-cxx-compiler gcc --no-open $url $contest_id.cpp |& tee $tmplog
+  oj submit --language cpp14 --no-guess --wait 0 --guess-cxx-compiler gcc --no-open $url $contest_id.cpp
   readonly submitted_url=$(cat $tmplog | grep "success: result:" |cut -d ' ' -f4)
   # echo $submitted_url
   rm -f $tmplog

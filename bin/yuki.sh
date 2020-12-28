@@ -155,7 +155,7 @@ commit_submission(){
   local file=$(printf "%04d" $contest_id ).cpp
 
   local submission_me="https://yukicoder.me/problems/no/$contest_id/submissions?submitter=8576&status=AC"
-  local title=$(cat $file | grep "@title" | cut -d ' ' -f4-6)
+  local title=$(cat $file | grep "@title" | cut -d ' ' -f4-)
 
   local tmpfile=$(mktemp)
   wget -q -O- $submission_me | grep -A5 -B5 "No.$contest_id" > $tmpfile

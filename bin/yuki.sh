@@ -57,8 +57,21 @@ setup_contest(){
   mkdir -p test/$(printf "%04d" $contest_id)
 
   url="https://yukicoder.me/problems/no/${contest_id}"
-  title=$(wget -q -O- $url | grep "title" | cut -d ">" -f2 | cut -d "<" -f1)
+  local page=$(mktemp)
+  wget -q -O- $url > $page
+  title=$(cat $page | grep "title" | cut -d ">" -f2 | cut -d "<" -f1 | sed 's#^0*##g')
   file=$(printf "%04d" $contest_id).cpp
+
+  error=$(cat $page | grep "小数誤差許容問題" | cut -d'$' -f2 )
+  if [ -n "$error" ] ; then
+    error=$(echo $error | sed 's#times##g') # 5 \times 10^{-4} -> 5 \ 10^{-4} or 10^{-4}
+    local _error_coef=$(echo $error | cut -d'\\' -f1 | tr -d ' ')
+    local error_coef="${_error_coef:-1}"
+    local _error_base=$(echo $error | cut -d'^' -f1 | cut -d'\\' -f2 | tr -d ' ')
+    local error_base="${_error_coef:-10}"
+    local _error_idx=$(echo $error | cut -d'^' -f2 | cut -d'{' -f2 | cut -d'}' -f1 | tr -d ' ')
+    local error_idx="${_error_idx:-0}"
+  fi
 
   if [ -e $file ]
   then
@@ -73,6 +86,11 @@ setup_contest(){
 **/
 
 EOS
+
+    if [ -n "$error" ] ; then
+      echo "/** @error $error_coef $error_base $error_idx **/" >> $file
+      echo "" >> $file
+    fi
     cat $path_to_yukicoder/etc/template.cpp >> $file
     oj_download "command" $contest_id $url
   fi
@@ -84,9 +102,10 @@ oj_download(){
   local command=$1
   local contest_id=$2
   local url="https://yukicoder.me/problems/no/${contest_id}"
+  echo "$contest_id"
 
-  mkdir -p test/$contest_id
-  oj download --silent -d test/$contest_id $url
+  mkdir -p test/$(printf "%04d" $contest_id)
+  oj download --silent -d test/$(printf "%04d" $contest_id) $url
 }
 
 # @doc dlsys <contest id> ## download system testcase
@@ -94,9 +113,24 @@ oj_download_sys(){
   local command=$1
   local contest_id=$2
   local url="https://yukicoder.me/problems/no/${contest_id}"
+  echo "$contest_id"
 
-  mkdir -p sys/$contest_id
-  oj download -a --silent -d sys/$contest_id $url
+  mkdir -p sys/$(printf "%04d" $contest_id)
+  oj download -a --silent -d sys/$(printf "%04d" $contest_id) $url
+}
+
+get_error_info(){
+  local contest_id=$1
+
+  cat $contest_id.cpp | grep "@error" > /dev/null
+  if [ "$?" -eq 0 ] ; then
+    error_coef=$(cat $contest_id.cpp | grep "@error" | cut -d'@' -f2 | cut -d' ' -f2 )
+    error_base=$(cat $contest_id.cpp | grep "@error" | cut -d'@' -f2 | cut -d' ' -f3 )
+    error_idx=$(cat $contest_id.cpp | grep "@error" | cut -d'@' -f2 | cut -d' ' -f4 )
+    echo "$error_coef"e"$error_idx"
+  else
+    echo "0"
+  fi
 }
 
 
@@ -105,10 +139,16 @@ oj_test(){
   local command=$1
   local contest_id=$2
 
-  if [ ! -d test/$contest_id ]; then oj_download command $contest_id ;fi
+  local error=$(get_error_info $contest_id)
+  if [ "$error" != "0" ] ; then
+    echo "ERROR MODE"
+  fi
+
+  if [ ! -d test/$contest_id ]; then oj_download command $(echo $contest_id | sed 's#^0*##g') ;fi
+
   time make $contest_id &&\
   mv $contest_id exe/$contest_id &&\
-  oj test --tle $TLE --jobs $JOB --print-input --print-memory -d test/$contest_id -c ./exe/$contest_id
+  oj test --tle $TLE --jobs $JOB --error $error --print-input --print-memory -d test/$contest_id -c ./exe/$contest_id
 }
 
 # @doc sys|system <level> ## test all testcase
@@ -116,10 +156,16 @@ oj_system_test(){
   local command=$1
   local contest_id=$2
 
-  if [ ! -d sys/$contest_id ]; then oj_download_sys command $contest_id ;fi
+  local error=$(get_error_info $contest_id)
+  if [ "$error" != "0" ] ; then
+    echo "ERROR MODE"
+  fi
+
+  if [ ! -d sys/$contest_id ]; then oj_download_sys command $(echo $contest_id | sed 's#^0*##g') ;fi
+
   time make $contest_id &&\
   mv $contest_id exe/$contest_id &&\
-  oj test --tle $TLE --jobs $JOB --print-input --print-memory -d sys/$contest_id -c ./exe/$contest_id
+  oj test --tle $TLE --jobs $JOB --error $error --print-input --print-memory -d sys/$contest_id -c ./exe/$contest_id
 }
 
 
@@ -155,7 +201,7 @@ commit_submission(){
   local file=$(printf "%04d" $contest_id ).cpp
 
   local submission_me="https://yukicoder.me/problems/no/$contest_id/submissions?submitter=8576&status=AC"
-  local title=$(cat $file | grep "@title" | cut -d ' ' -f4-)
+  local title=$(cat $file | grep "@title" | cut -d ' ' -f3- )
 
   local tmpfile=$(mktemp)
   wget -q -O- $submission_me | grep -A5 -B5 "No.$contest_id" > $tmpfile

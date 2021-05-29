@@ -10,3 +10,4 @@ $(TARGET): $(OBJS)
 
 clean:
 	rm -f $(TARGET) $(OBJS) exe/*
+	rm -fr *.dSYM
